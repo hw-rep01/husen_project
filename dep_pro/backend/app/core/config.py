@@ -27,7 +27,9 @@ class Settings(BaseSettings):
     embedding_provider: Literal["huggingface", "openai", "stub"] = "huggingface"
     embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     openai_embedding_model: str = "text-embedding-3-small"
-    embedding_dimension: int = 384
+    # مفاتيح OpenAI الجديدة (sk-proj) لا تدعم وسائط التضمين المخصصة،
+    # لذا البُعد الافتراضي مع text-embedding-3-small هو 1536.
+    embedding_dimension: int = 1536
     openai_api_key: str | None = None
 
     llm_model: str = "gpt-4o-mini"

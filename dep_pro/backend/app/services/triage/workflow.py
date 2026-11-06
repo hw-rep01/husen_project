@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -18,14 +18,18 @@ from app.models import (
 )
 from app.services.access import ensure_course_access
 from app.services.errors import AccessDeniedError, BusinessRuleError, NotFoundError
-from app.services.triage.deduplication import attach_on_submit, consolidate_section, refresh_batch_summary
+from app.services.triage.deduplication import (
+    attach_on_submit,
+    consolidate_section,
+    refresh_batch_summary,
+)
 from app.services.triage.events import record_event
 from app.services.triage.notify import notify_stage, notify_students
 from app.services.triage.routing import (
+    DECISION_STATUS,
     STAGE_ROLE,
     TERMINAL_STATUSES,
     Action,
-    DECISION_STATUS,
     next_stage,
     permission_for,
     validate_action,
@@ -107,9 +111,7 @@ def load_unit(db: Session, *, request_id: int | None = None, batch_id: int | Non
             raise NotFoundError("البطاقة الموحدة غير موجودة")
         members = list(
             db.scalars(
-                select(StudentRequest)
-                .where(StudentRequest.batch_id == batch.id)
-                .order_by(StudentRequest.id)
+                select(StudentRequest).where(StudentRequest.batch_id == batch.id).order_by(StudentRequest.id)
             ).all()
         )
         if not members:
@@ -136,16 +138,20 @@ def _assert_scope(db: Session, actor: User, unit: Unit) -> None:
     if stage == REP:
         allowed = actor.section_id is not None and actor.section_id == unit.section_id
     elif stage == INSTRUCTOR:
-        allowed = unit.course_id is not None and db.scalar(
-            select(CourseInstructor.id).where(
-                CourseInstructor.course_id == unit.course_id,
-                CourseInstructor.instructor_id == actor.id,
+        allowed = (
+            unit.course_id is not None
+            and db.scalar(
+                select(CourseInstructor.id).where(
+                    CourseInstructor.course_id == unit.course_id,
+                    CourseInstructor.instructor_id == actor.id,
+                )
             )
-        ) is not None
+            is not None
+        )
     else:
         section = db.get(Section, unit.section_id)
-        allowed = section is not None and actor.department_id is not None and (
-            actor.department_id == section.department_id
+        allowed = (
+            section is not None and actor.department_id is not None and (actor.department_id == section.department_id)
         )
     if not allowed:
         raise AccessDeniedError("الطلب خارج نطاق صلاحياتك")
@@ -208,7 +214,7 @@ def perform_action(
     _assert_actor(actor, stage, action)
     _assert_scope(db, actor, unit)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     if action == Action.FORWARD:
         target = next_stage(category, stage)

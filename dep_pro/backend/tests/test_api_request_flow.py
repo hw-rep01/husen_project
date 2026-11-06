@@ -2,7 +2,7 @@
 
 from sqlalchemy import select
 
-from app.models import Course, Enrollment, Room, Section, Semester, User
+from app.models import Course
 
 
 def _course_id(db):
@@ -72,13 +72,19 @@ def test_academic_request_full_path_to_instructor_approval(client, auth, db):
 
 def test_administrative_request_goes_through_coordinator_and_head(client, auth):
     request = _submit(client, auth, None, subject="مشكلة في القاعة", body="القاعة مغلقة صباحاً")
-    assert client.post(
-        f"/api/requests/{request['id']}/classify", headers=auth("rep"), json={"category": "administrative"}
-    ).status_code == 200
+    assert (
+        client.post(
+            f"/api/requests/{request['id']}/classify", headers=auth("rep"), json={"category": "administrative"}
+        ).status_code
+        == 200
+    )
 
-    assert client.post(
-        f"/api/requests/{request['id']}/actions", headers=auth("rep"), json={"action": "forward"}
-    ).json()["current_stage"] == "department_coordinator"
+    assert (
+        client.post(f"/api/requests/{request['id']}/actions", headers=auth("rep"), json={"action": "forward"}).json()[
+            "current_stage"
+        ]
+        == "department_coordinator"
+    )
 
     coord_forward = client.post(
         f"/api/requests/{request['id']}/actions", headers=auth("coord"), json={"action": "forward"}
@@ -94,9 +100,7 @@ def test_administrative_request_goes_through_coordinator_and_head(client, auth):
     assert head_decision.json()["status"] == "approved"
 
     # بعد الإغلاق لا تُقبل أي إجراءات جديدة
-    closed = client.post(
-        f"/api/requests/{request['id']}/actions", headers=auth("head"), json={"action": "reject"}
-    )
+    closed = client.post(f"/api/requests/{request['id']}/actions", headers=auth("head"), json={"action": "reject"})
     assert closed.status_code == 400
 
 
@@ -124,9 +128,7 @@ def test_coordinator_cannot_classify_student_request(client, auth):
 def test_representative_cannot_approve_academic_request(client, auth, db):
     request = _submit(client, auth, _course_id(db), subject="طلب أكاديمي للرفض", body="نص كاف لطلب أكاديمي")
     client.post(f"/api/requests/{request['id']}/classify", headers=auth("rep"), json={"category": "academic"})
-    response = client.post(
-        f"/api/requests/{request['id']}/actions", headers=auth("rep"), json={"action": "approve"}
-    )
+    response = client.post(f"/api/requests/{request['id']}/actions", headers=auth("rep"), json={"action": "approve"})
     assert response.status_code == 400
 
 

@@ -3,7 +3,13 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Notification, NotificationStatus, NotificationType, User, UserRole
+from app.models import (
+    Notification,
+    NotificationStatus,
+    NotificationType,
+    User,
+    UserRole,
+)
 
 STUDENT_ROLES = (UserRole.STUDENT, UserRole.CLASS_REPRESENTATIVE)
 

@@ -45,7 +45,7 @@ def extract_document(path: str | Path) -> ExtractedDocument:
     for page_number, page in enumerate(reader.pages, start=1):
         try:
             raw = page.extract_text() or ""
-        except Exception:  # صفحة تالفة لا توقف بقية الملف
+        except Exception:
             raw = ""
         text = normalize_text(raw)
         if text:

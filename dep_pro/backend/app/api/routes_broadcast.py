@@ -8,7 +8,12 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models import Broadcast, BroadcastChannel, BroadcastScope, User
-from app.services.broadcast.hub import list_readers, mark_read, post_broadcast, visible_broadcasts
+from app.services.broadcast.hub import (
+    list_readers,
+    mark_read,
+    post_broadcast,
+    visible_broadcasts,
+)
 
 router = APIRouter(prefix="/api/broadcasts", tags=["broadcasts"])
 

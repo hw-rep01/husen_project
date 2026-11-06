@@ -1,13 +1,21 @@
 import numpy as np
 import pytest
 
+from app.services.common.vector_math import cosine_similarity
 from app.services.errors import LLMOutputError
+from app.services.gaps.clustering import (
+    centroid_of,
+    cluster_embeddings,
+    most_central_index,
+)
 from app.services.rag.chunking import chunk_pages
 from app.services.rag.embeddings import StubEmbedder
 from app.services.rag.pdf_loader import PageText, normalize_text
-from app.services.rag.quiz_service import GeneratedQuestion, evidence_is_grounded, parse_generated_payload
-from app.services.common.vector_math import cosine_similarity
-from app.services.gaps.clustering import centroid_of, cluster_embeddings, most_central_index
+from app.services.rag.quiz_service import (
+    GeneratedQuestion,
+    evidence_is_grounded,
+    parse_generated_payload,
+)
 
 
 def test_normalize_text_removes_tatweel_and_control_chars():

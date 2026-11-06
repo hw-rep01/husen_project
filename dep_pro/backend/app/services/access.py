@@ -1,7 +1,15 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Course, CourseInstructor, Enrollment, Quiz, Semester, User, UserRole
+from app.models import (
+    Course,
+    CourseInstructor,
+    Enrollment,
+    Quiz,
+    Semester,
+    User,
+    UserRole,
+)
 from app.services.errors import AccessDeniedError, NotFoundError
 
 DEPARTMENT_ROLES = {UserRole.DEPARTMENT_HEAD, UserRole.DEPARTMENT_COORDINATOR}
@@ -14,25 +22,32 @@ def ensure_course_access(db: Session, user: User, course_id: int) -> Course:
         raise NotFoundError("المادة غير موجودة")
 
     if user.role == UserRole.INSTRUCTOR:
-        allowed = db.scalar(
-            select(CourseInstructor.id).where(
-                CourseInstructor.course_id == course.id,
-                CourseInstructor.instructor_id == user.id,
+        allowed = (
+            db.scalar(
+                select(CourseInstructor.id).where(
+                    CourseInstructor.course_id == course.id,
+                    CourseInstructor.instructor_id == user.id,
+                )
             )
-        ) is not None
+            is not None
+        )
     elif user.role in DEPARTMENT_ROLES:
         allowed = user.department_id == course.department_id
     elif user.role in SECTION_ROLES:
-        allowed = user.section_id is not None and db.scalar(
-            select(Enrollment.id)
-            .join(Semester, Semester.id == Enrollment.semester_id)
-            .where(
-                Enrollment.course_id == course.id,
-                Enrollment.section_id == user.section_id,
-                Semester.is_active.is_(True),
+        allowed = (
+            user.section_id is not None
+            and db.scalar(
+                select(Enrollment.id)
+                .join(Semester, Semester.id == Enrollment.semester_id)
+                .where(
+                    Enrollment.course_id == course.id,
+                    Enrollment.section_id == user.section_id,
+                    Semester.is_active.is_(True),
+                )
+                .limit(1)
             )
-            .limit(1)
-        ) is not None
+            is not None
+        )
     else:
         allowed = False
 

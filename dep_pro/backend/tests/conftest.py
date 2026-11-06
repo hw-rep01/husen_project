@@ -5,7 +5,7 @@
 
 import os
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 _TMP_DIR = tempfile.mkdtemp(prefix="sdp_tests_")
 os.environ["APP_ENV"] = "development"
@@ -16,12 +16,12 @@ os.environ["STORAGE_DIR"] = os.path.join(_TMP_DIR, "materials")
 os.environ["JWT_SECRET_KEY"] = "test-secret-key-that-is-long-enough-for-hs256-tests"
 os.environ.pop("OPENAI_API_KEY", None)
 
-import pytest  # noqa: E402
-from fastapi.testclient import TestClient  # noqa: E402
+import pytest
+from fastapi.testclient import TestClient
 
-from app.db.session import SessionLocal  # noqa: E402
-from app.main import app  # noqa: E402
-from scripts.seed_db import seed  # noqa: E402
+from app.db.session import SessionLocal
+from app.main import app
+from scripts.seed_db import seed
 
 PASSWORD = "ChangeMe123!"
 ACCOUNTS = {
@@ -70,4 +70,4 @@ def db():
 
 @pytest.fixture(scope="session")
 def now_utc():
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)

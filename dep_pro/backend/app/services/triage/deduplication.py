@@ -2,7 +2,13 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.models import RequestBatch, RequestCategory, RequestStatus, RoutingStage, StudentRequest
+from app.models import (
+    RequestBatch,
+    RequestCategory,
+    RequestStatus,
+    RoutingStage,
+    StudentRequest,
+)
 from app.services.common.vector_math import cosine_similarity, to_matrix
 from app.services.gaps.clustering import centroid_of, cluster_embeddings
 from app.services.triage.events import record_event
@@ -32,11 +38,7 @@ def _batch_centroid(vectors: list[list[float]]) -> list[float]:
 
 def _members(db: Session, batch_id: int) -> list[StudentRequest]:
     return list(
-        db.scalars(
-            select(StudentRequest)
-            .where(StudentRequest.batch_id == batch_id)
-            .order_by(StudentRequest.id)
-        ).all()
+        db.scalars(select(StudentRequest).where(StudentRequest.batch_id == batch_id).order_by(StudentRequest.id)).all()
     )
 
 

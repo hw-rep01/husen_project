@@ -1,5 +1,4 @@
 import json
-from datetime import timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -18,11 +17,21 @@ from app.models import (
     User,
 )
 from app.services.access import ensure_course_access
-from app.services.common.timeutil import as_utc, local_day_bounds, local_to_utc, local_tz, utc_now
+from app.services.common.timeutil import (
+    as_utc,
+    local_day_bounds,
+    local_to_utc,
+    local_tz,
+    utc_now,
+)
 from app.services.errors import AccessDeniedError, BusinessRuleError, NotFoundError
 from app.services.notify.service import notify_section
 from app.services.schedule.conflicts import BusyBlock, find_conflicts
-from app.services.schedule.snapshot import instructor_ids_by_course, load_snapshot, relevant_course_ids
+from app.services.schedule.snapshot import (
+    instructor_ids_by_course,
+    load_snapshot,
+    relevant_course_ids,
+)
 
 
 def describe(occ: LectureOccurrence, course_name: str, room_code: str | None) -> str:
@@ -127,7 +136,9 @@ def assert_free(
         raise BusinessRuleError("؛ ".join(conflicts))
 
 
-def change_room(db: Session, actor: User, occurrence_id: int, room_id: int, note: str | None = None) -> LectureOccurrence:
+def change_room(
+    db: Session, actor: User, occurrence_id: int, room_id: int, note: str | None = None
+) -> LectureOccurrence:
     occ, enrollment = authorize_edit(db, actor, occurrence_id)
     if occ.is_cancelled:
         raise BusinessRuleError("لا يمكن تغيير قاعة محاضرة ملغاة")
@@ -141,12 +152,18 @@ def change_room(db: Session, actor: User, occurrence_id: int, room_id: int, note
     occ.version += 1
 
     record_change(
-        db, occ, actor, ChangeType.ROOM_CHANGE,
+        db,
+        occ,
+        actor,
+        ChangeType.ROOM_CHANGE,
         {"room_id": old_room, "room_code": _room_code(db, old_room)},
         {"room_id": room.id, "room_code": room.code},
     )
     notify_schedule_change(
-        db, occ, enrollment, "تغيير قاعة محاضرة",
+        db,
+        occ,
+        enrollment,
+        "تغيير قاعة محاضرة",
         describe(occ, _course_name(db, enrollment), room.code),
     )
     db.commit()
@@ -200,7 +217,10 @@ def reschedule(
 
     record_change(db, occ, actor, ChangeType.TIME_CHANGE, old, new)
     notify_schedule_change(
-        db, occ, enrollment, "تغيير موعد محاضرة",
+        db,
+        occ,
+        enrollment,
+        "تغيير موعد محاضرة",
         describe(occ, _course_name(db, enrollment), _room_code(db, occ.room_id)),
     )
     db.commit()
@@ -226,7 +246,10 @@ def cancel_occurrence(
 
     change_type = ChangeType.POSTPONEMENT if as_postponement else ChangeType.CANCELLATION
     record_change(
-        db, occ, actor, change_type,
+        db,
+        occ,
+        actor,
+        change_type,
         {"is_cancelled": False},
         {"is_cancelled": True, "slot_type": occ.slot_type.value},
     )

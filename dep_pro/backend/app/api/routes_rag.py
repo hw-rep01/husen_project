@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy import select
@@ -317,7 +318,7 @@ def acknowledge_alert(
     if alert is None or alert.instructor_id != user.id:
         raise NotFoundError("التنبيه غير موجود")
     alert.status = GapAlertStatus.ACKNOWLEDGED
-    alert.acknowledged_at = datetime.now(timezone.utc)
+    alert.acknowledged_at = datetime.now(UTC)
     db.commit()
     db.refresh(alert)
     return _alert_out(alert)

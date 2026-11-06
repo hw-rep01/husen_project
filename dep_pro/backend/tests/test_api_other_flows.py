@@ -1,6 +1,6 @@
 """الكويزات، رادار الفجوات، التبليغات، الجدول، والإشعارات عبر الـ API."""
 
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import UTC, datetime, time, timedelta
 
 from sqlalchemy import select
 
@@ -12,15 +12,12 @@ from app.models import (
     QuizQuestion,
     QuizStatus,
     Room,
-    Semester,
     StudentQuestion,
     TimeSlot,
     User,
-    UserRole,
 )
-from app.services.common.timeutil import local_today, local_to_utc
+from app.services.common.timeutil import local_to_utc, local_today, utc_now
 from app.services.notify.dispatch import dispatch_due_notifications
-from app.services.common.timeutil import utc_now
 
 
 def _course(db):
@@ -32,6 +29,7 @@ def _user(db, email):
 
 
 # ---------- الكويزات ----------
+
 
 def _create_draft_quiz(db, course, instructor):
     quiz = Quiz(course_id=course.id, created_by_user_id=instructor.id, title="كويز تجريبي", status=QuizStatus.DRAFT)
@@ -86,7 +84,7 @@ def test_student_cannot_create_or_publish_quiz(client, auth, db):
 
 def test_quiz_closed_for_attempts_after_deadline(client, auth, db):
     quiz = _create_draft_quiz(db, _course(db), _user(db, "dr@sdp.local"))
-    past = datetime.now(timezone.utc) - timedelta(days=2)
+    past = datetime.now(UTC) - timedelta(days=2)
     client.post(
         f"/api/quizzes/{quiz.id}/publish",
         headers=auth("instructor"),
@@ -101,9 +99,9 @@ def test_quiz_closed_for_attempts_after_deadline(client, auth, db):
 
 # ---------- رادار الفجوات ----------
 
+
 def test_gap_radar_raises_alert_when_most_of_section_struggles(client, auth, db):
     course = _course(db)
-    semester = db.scalar(select(Semester).where(Semester.is_active.is_(True)))
     section_id = db.scalar(select(Enrollment.section_id).where(Enrollment.course_id == course.id))
     vector = [1.0] + [0.0] * 383
     for email in ("student@sdp.local", "rep@sdp.local"):
@@ -116,7 +114,7 @@ def test_gap_radar_raises_alert_when_most_of_section_struggles(client, auth, db)
                 question_text="ما الفرق بين المتطلبات الوظيفية وغير الوظيفية؟",
                 was_grounded=True,
                 embedding=vector,
-                created_at=datetime(2026, 10, 10, tzinfo=timezone.utc),
+                created_at=datetime(2026, 10, 10, tzinfo=UTC),
             )
         )
     db.commit()
@@ -140,6 +138,7 @@ def test_gap_alerts_are_private_to_the_instructor(client, auth, db):
 
 
 # ---------- التبليغات والإشعارات ----------
+
 
 def test_broadcast_read_counter_counts_each_student_once(client, auth, db):
     response = client.post(
@@ -192,6 +191,7 @@ def test_instructor_broadcast_is_scoped_to_course(client, auth, db):
 
 # ---------- الجدول والتغييرات والتعويض ----------
 
+
 def _occurrence(db, day, hour=8):
     course_enrollment = db.scalar(select(Enrollment).join(Course).where(Course.code == "SE301"))
     room = db.scalar(select(Room).where(Room.code == "B-203"))
@@ -243,8 +243,12 @@ def test_postponement_then_makeup_suggestion_is_accepted(client, auth, db):
     suggestions = client.post(
         "/api/schedule/makeup/suggest",
         headers=auth("instructor"),
-        json={"enrollment_id": enrollment_id, "from_date": (local_today() + timedelta(days=1)).isoformat(),
-              "days_ahead": 14, "limit": 5},
+        json={
+            "enrollment_id": enrollment_id,
+            "from_date": (local_today() + timedelta(days=1)).isoformat(),
+            "days_ahead": 14,
+            "limit": 5,
+        },
     )
     assert suggestions.status_code == 200, suggestions.text
     options = suggestions.json()

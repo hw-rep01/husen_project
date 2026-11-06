@@ -76,9 +76,7 @@ class CourseInstructor(Base):
 
 class Enrollment(Base):
     __tablename__ = "enrollments"
-    __table_args__ = (
-        UniqueConstraint("section_id", "course_id", "semester_id", name="uq_enrollment"),
-    )
+    __table_args__ = (UniqueConstraint("section_id", "course_id", "semester_id", name="uq_enrollment"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     section_id: Mapped[int] = mapped_column(ForeignKey("sections.id", ondelete="CASCADE"), index=True)

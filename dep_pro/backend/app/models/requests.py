@@ -18,7 +18,9 @@ class RequestBatch(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     section_id: Mapped[int] = mapped_column(ForeignKey("sections.id", ondelete="CASCADE"), index=True)
-    course_id: Mapped[int | None] = mapped_column(ForeignKey("courses.id", ondelete="SET NULL"), nullable=True, index=True)
+    course_id: Mapped[int | None] = mapped_column(
+        ForeignKey("courses.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     category: Mapped[RequestCategory] = mapped_column(Enum(RequestCategory, native_enum=False, length=16))
     title: Mapped[str] = mapped_column(String(255))
     formal_summary: Mapped[str] = mapped_column(Text)
@@ -31,9 +33,13 @@ class RequestBatch(Base):
         Enum(RoutingStage, native_enum=False, length=32), default=RoutingStage.CLASS_REPRESENTATIVE
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
-    requests: Mapped[list["StudentRequest"]] = relationship(back_populates="batch", foreign_keys="StudentRequest.batch_id")
+    requests: Mapped[list["StudentRequest"]] = relationship(
+        back_populates="batch", foreign_keys="StudentRequest.batch_id"
+    )
     events: Mapped[list["RequestEvent"]] = relationship(back_populates="batch", cascade="all, delete-orphan")
 
 
@@ -45,7 +51,9 @@ class StudentRequest(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     section_id: Mapped[int] = mapped_column(ForeignKey("sections.id", ondelete="CASCADE"), index=True)
-    course_id: Mapped[int | None] = mapped_column(ForeignKey("courses.id", ondelete="SET NULL"), nullable=True, index=True)
+    course_id: Mapped[int | None] = mapped_column(
+        ForeignKey("courses.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     subject: Mapped[str] = mapped_column(String(255))
     body: Mapped[str] = mapped_column(Text)
     category: Mapped[RequestCategory | None] = mapped_column(
@@ -63,7 +71,9 @@ class StudentRequest(Base):
         ForeignKey("request_batches.id", ondelete="SET NULL"), nullable=True, index=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     batch: Mapped["RequestBatch | None"] = relationship(back_populates="requests", foreign_keys=[batch_id])
     events: Mapped[list["RequestEvent"]] = relationship(back_populates="request", cascade="all, delete-orphan")

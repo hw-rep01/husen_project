@@ -14,9 +14,7 @@ def instructor_ids_by_course(db: Session, course_ids: Iterable[int]) -> dict[int
     if not ids:
         return {}
     rows = db.execute(
-        select(CourseInstructor.course_id, CourseInstructor.instructor_id).where(
-            CourseInstructor.course_id.in_(ids)
-        )
+        select(CourseInstructor.course_id, CourseInstructor.instructor_id).where(CourseInstructor.course_id.in_(ids))
     ).all()
     grouped: dict[int, set[int]] = {}
     for course_id, instructor_id in rows:

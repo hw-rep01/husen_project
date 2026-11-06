@@ -103,7 +103,7 @@ def run_ingestion(db: Session, material_id: int) -> str:
         embedder = get_embedder()
         vectors: list[list[float]] = []
         for start in range(0, len(chunks), EMBED_BATCH_SIZE):
-            batch = chunks[start:start + EMBED_BATCH_SIZE]
+            batch = chunks[start : start + EMBED_BATCH_SIZE]
             vectors.extend(embedder.embed_documents([chunk.content for chunk in batch]))
         if len(vectors) != len(chunks):
             raise IngestionError("عدد التضمينات لا يطابق عدد المقاطع")

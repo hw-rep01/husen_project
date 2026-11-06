@@ -1,6 +1,16 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, Float, ForeignKey, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import (
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.config import get_settings
@@ -27,7 +37,9 @@ class TopicCluster(Base):
     section_student_total: Mapped[int] = mapped_column(Integer, default=0)
     affected_ratio: Mapped[float] = mapped_column(Float, default=0.0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     members: Mapped[list["TopicClusterMember"]] = relationship(back_populates="cluster", cascade="all, delete-orphan")
 
@@ -59,9 +71,7 @@ class GapAlert(Base):
     section_id: Mapped[int] = mapped_column(ForeignKey("sections.id", ondelete="CASCADE"), index=True)
     semester_id: Mapped[int] = mapped_column(ForeignKey("semesters.id", ondelete="CASCADE"), index=True)
     instructor_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    cluster_id: Mapped[int | None] = mapped_column(
-        ForeignKey("topic_clusters.id", ondelete="SET NULL"), nullable=True
-    )
+    cluster_id: Mapped[int | None] = mapped_column(ForeignKey("topic_clusters.id", ondelete="SET NULL"), nullable=True)
     topic_label: Mapped[str] = mapped_column(String(255))
     centroid: Mapped[list[float] | None] = mapped_column(VectorType(EMBEDDING_DIM), nullable=True)
     distinct_student_count: Mapped[int] = mapped_column(Integer, default=0)
@@ -72,5 +82,7 @@ class GapAlert(Base):
         Enum(GapAlertStatus, native_enum=False, length=16), default=GapAlertStatus.OPEN
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
     acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

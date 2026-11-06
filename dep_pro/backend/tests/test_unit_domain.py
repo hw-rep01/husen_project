@@ -6,10 +6,26 @@ from app.core.permissions import role_has_permission
 from app.models import RequestCategory, RoutingStage, UserRole
 from app.services.common.timeutil import local_day_bounds, local_to_utc
 from app.services.errors import AccessDeniedError, BusinessRuleError
-from app.services.schedule.conflicts import AbsenceBlock, BusyBlock, ScheduleSnapshot, find_conflicts, overlaps
-from app.services.schedule.makeup_engine import MakeupQuery, RoomSpec, SlotSpec, find_makeup_candidates
-from app.services.triage.routing import Action, next_stage, permission_for, validate_action
+from app.services.schedule.conflicts import (
+    AbsenceBlock,
+    BusyBlock,
+    ScheduleSnapshot,
+    find_conflicts,
+    overlaps,
+)
+from app.services.schedule.makeup_engine import (
+    MakeupQuery,
+    RoomSpec,
+    SlotSpec,
+    find_makeup_candidates,
+)
 from app.services.triage.classifier import classify_request
+from app.services.triage.routing import (
+    Action,
+    next_stage,
+    permission_for,
+    validate_action,
+)
 from app.services.triage.summarizer import summarize_batch
 
 DAY = date(2030, 1, 7)  # يوم اثنين
@@ -20,6 +36,7 @@ def _block(occ_id, start, end, room, section=1, instructors=frozenset({10})):
 
 
 # ---------- الصلاحيات والمسارات ----------
+
 
 def test_academic_path_ends_at_instructor():
     assert next_stage(RequestCategory.ACADEMIC, RoutingStage.CLASS_REPRESENTATIVE) == RoutingStage.INSTRUCTOR
@@ -79,6 +96,7 @@ def test_role_permission_matrix(role, permission, expected):
 
 # ---------- التصنيف والتلخيص بلا مفتاح نموذج ----------
 
+
 def test_classifier_returns_none_without_llm_key():
     assert classify_request("تأجيل الكويز", "نرجو تأجيل الكويز الثاني") is None
 
@@ -90,6 +108,7 @@ def test_summary_falls_back_without_llm_key():
 
 
 # ---------- التعارض والتعويض ----------
+
 
 def test_adjacent_lectures_do_not_conflict():
     snap = ScheduleSnapshot(busy=(_block(1, time(8), time(9, 30), room=5),))
@@ -143,6 +162,7 @@ def test_makeup_respects_excluded_weekdays():
 
 
 # ---------- التوقيت ----------
+
 
 def test_local_baghdad_time_converts_to_utc():
     # بغداد UTC+3 بلا توقيت صيفي

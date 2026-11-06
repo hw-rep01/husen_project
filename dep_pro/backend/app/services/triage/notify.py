@@ -51,9 +51,7 @@ def recipients_for_stage(
         if course_id is None:
             return []
         return list(
-            db.scalars(
-                select(CourseInstructor.instructor_id).where(CourseInstructor.course_id == course_id)
-            ).all()
+            db.scalars(select(CourseInstructor.instructor_id).where(CourseInstructor.course_id == course_id)).all()
         )
 
     section = db.get(Section, section_id)

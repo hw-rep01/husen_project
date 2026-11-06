@@ -26,8 +26,7 @@ class HuggingFaceEmbedder:
         actual = self._model.get_sentence_embedding_dimension()
         if actual != dimension:
             raise ValueError(
-                f"بُعد النموذج {actual} لا يطابق EMBEDDING_DIMENSION={dimension}. "
-                "حدّث الإعداد وأعد تضمين الملازم."
+                f"بُعد النموذج {actual} لا يطابق EMBEDDING_DIMENSION={dimension}. حدّث الإعداد وأعد تضمين الملازم."
             )
         self.dimension = dimension
 

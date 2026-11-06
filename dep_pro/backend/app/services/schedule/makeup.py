@@ -8,7 +8,6 @@ from app.core.permissions import role_has_permission
 from app.models import (
     ChangeType,
     Course,
-    CourseInstructor,
     Enrollment,
     LectureOccurrence,
     MakeupSuggestion,
@@ -30,8 +29,17 @@ from app.services.schedule.changes import (
     record_change,
     require_available_room,
 )
-from app.services.schedule.makeup_engine import MakeupQuery, RoomSpec, SlotSpec, find_makeup_candidates
-from app.services.schedule.snapshot import instructor_ids_by_course, load_snapshot, relevant_course_ids
+from app.services.schedule.makeup_engine import (
+    MakeupQuery,
+    RoomSpec,
+    SlotSpec,
+    find_makeup_candidates,
+)
+from app.services.schedule.snapshot import (
+    instructor_ids_by_course,
+    load_snapshot,
+    relevant_course_ids,
+)
 
 
 def suggest_makeup(
@@ -171,13 +179,19 @@ def accept_makeup(db: Session, actor: User, suggestion_id: int) -> LectureOccurr
     suggestion.is_accepted = True
 
     record_change(
-        db, occ, actor, ChangeType.MAKEUP_ADDED,
+        db,
+        occ,
+        actor,
+        ChangeType.MAKEUP_ADDED,
         {},
         {"date": suggestion.suggested_date.isoformat(), "room_id": room.id},
     )
     course_name = db.get(Course, enrollment.course_id).name_ar
     notify_schedule_change(
-        db, occ, enrollment, "محاضرة تعويضية",
+        db,
+        occ,
+        enrollment,
+        "محاضرة تعويضية",
         f"تمت جدولة محاضرة تعويضية: {describe(occ, course_name, room.code)}",
     )
     db.commit()

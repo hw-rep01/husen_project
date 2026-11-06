@@ -91,16 +91,19 @@ def is_in_audience(db: Session, user: User, channel: BroadcastChannel) -> bool:
         return user.department_id == channel.department_id
     if user.section_id is None:
         return False
-    return db.scalar(
-        select(Enrollment.id)
-        .join(Semester, Semester.id == Enrollment.semester_id)
-        .where(
-            Enrollment.section_id == user.section_id,
-            Enrollment.course_id == channel.course_id,
-            Semester.is_active.is_(True),
+    return (
+        db.scalar(
+            select(Enrollment.id)
+            .join(Semester, Semester.id == Enrollment.semester_id)
+            .where(
+                Enrollment.section_id == user.section_id,
+                Enrollment.course_id == channel.course_id,
+                Semester.is_active.is_(True),
+            )
+            .limit(1)
         )
-        .limit(1)
-    ) is not None
+        is not None
+    )
 
 
 def can_view(db: Session, user: User, channel: BroadcastChannel) -> bool:
@@ -219,11 +222,7 @@ def mark_read(db: Session, user: User, broadcast_id: int) -> Broadcast:
         db.add(BroadcastRead(broadcast_id=broadcast.id, user_id=user.id))
         db.flush()
         # زيادة ذرية للعداد، فلا تتأثر بالتزامن بين الطلاب
-        db.execute(
-            update(Broadcast)
-            .where(Broadcast.id == broadcast.id)
-            .values(seen_count=Broadcast.seen_count + 1)
-        )
+        db.execute(update(Broadcast).where(Broadcast.id == broadcast.id).values(seen_count=Broadcast.seen_count + 1))
         db.commit()
     except IntegrityError:
         # قراءة متزامنة من الجهاز نفسه: السجل موجود بالفعل

@@ -83,10 +83,7 @@ def my_courses(user: User = Depends(get_current_user), db: Session = Depends(get
         return []
 
     courses = db.scalars(stmt.distinct().order_by(Course.code)).all()
-    return [
-        CourseOut(id=c.id, code=c.code, name_ar=c.name_ar, department_id=c.department_id)
-        for c in courses
-    ]
+    return [CourseOut(id=c.id, code=c.code, name_ar=c.name_ar, department_id=c.department_id) for c in courses]
 
 
 @router.get("/rooms", response_model=list[RoomOut])
@@ -99,10 +96,7 @@ def available_rooms(user: User = Depends(get_current_user), db: Session = Depend
         )
         .order_by(Room.code)
     ).all()
-    return [
-        RoomOut(id=r.id, code=r.code, name=r.name, capacity=r.capacity, is_available=r.is_available)
-        for r in rooms
-    ]
+    return [RoomOut(id=r.id, code=r.code, name=r.name, capacity=r.capacity, is_available=r.is_available) for r in rooms]
 
 
 @router.get("/courses/{course_id}/quizzes", response_model=list[QuizListItem])
@@ -137,9 +131,7 @@ def course_materials(
 ) -> list[MaterialListItem]:
     ensure_course_access(db, user, course_id)
     rows = db.scalars(
-        select(CourseMaterial)
-        .where(CourseMaterial.course_id == course_id)
-        .order_by(CourseMaterial.created_at.desc())
+        select(CourseMaterial).where(CourseMaterial.course_id == course_id).order_by(CourseMaterial.created_at.desc())
     ).all()
     return [
         MaterialListItem(

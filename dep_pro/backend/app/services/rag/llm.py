@@ -10,9 +10,7 @@ from app.services.errors import LLMNotConfiguredError
 def get_chat_model() -> ChatOpenAI:
     settings = get_settings()
     if not settings.openai_api_key:
-        raise LLMNotConfiguredError(
-            "OPENAI_API_KEY غير مضبوط. مطلوب لتوليد الإجابات والتلخيصات والكويزات."
-        )
+        raise LLMNotConfiguredError("OPENAI_API_KEY غير مضبوط. مطلوب لتوليد الإجابات والتلخيصات والكويزات.")
     return ChatOpenAI(
         model=settings.llm_model,
         temperature=settings.llm_temperature,

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
-from app import models  # noqa: F401  (تسجيل النماذج في Base.metadata)
+from app import models
 from app.api import (
     routes_auth,
     routes_broadcast,
@@ -81,8 +81,6 @@ async def platform_error_handler(request: Request, exc: PlatformError) -> JSONRe
             status_code = code
             break
     return JSONResponse(status_code=status_code, content={"detail": str(exc)})
-
-
 
 
 @app.get("/health", tags=["system"])

@@ -74,10 +74,7 @@ def build_unit_views(db: Session, requests: list[StudentRequest]) -> list[UnitVi
     batch_ids = {r.batch_id for r in requests if r.batch_id is not None}
     batches: dict[int, RequestBatch] = {}
     if batch_ids:
-        batches = {
-            b.id: b
-            for b in db.scalars(select(RequestBatch).where(RequestBatch.id.in_(batch_ids))).all()
-        }
+        batches = {b.id: b for b in db.scalars(select(RequestBatch).where(RequestBatch.id.in_(batch_ids))).all()}
 
     views: list[UnitView] = []
     seen: set[int] = set()
@@ -93,19 +90,18 @@ def build_unit_views(db: Session, requests: list[StudentRequest]) -> list[UnitVi
 
 
 def taught_course_ids(db: Session, user: User) -> list[int]:
-    return list(
-        db.scalars(
-            select(CourseInstructor.course_id).where(CourseInstructor.instructor_id == user.id)
-        ).all()
-    )
+    return list(db.scalars(select(CourseInstructor.course_id).where(CourseInstructor.instructor_id == user.id)).all())
 
 
 def _reached(db: Session, request_id: int, stage: RoutingStage) -> bool:
-    return db.scalar(
-        select(RequestEvent.id)
-        .where(RequestEvent.request_id == request_id, RequestEvent.to_stage == stage)
-        .limit(1)
-    ) is not None
+    return (
+        db.scalar(
+            select(RequestEvent.id)
+            .where(RequestEvent.request_id == request_id, RequestEvent.to_stage == stage)
+            .limit(1)
+        )
+        is not None
+    )
 
 
 def can_view_request(db: Session, user: User, request: StudentRequest) -> bool:
@@ -134,9 +130,7 @@ def can_view_request(db: Session, user: User, request: StudentRequest) -> bool:
 def student_requests(db: Session, user: User) -> list[StudentRequest]:
     return list(
         db.scalars(
-            select(StudentRequest)
-            .where(StudentRequest.student_id == user.id)
-            .order_by(desc(StudentRequest.created_at))
+            select(StudentRequest).where(StudentRequest.student_id == user.id).order_by(desc(StudentRequest.created_at))
         ).all()
     )
 

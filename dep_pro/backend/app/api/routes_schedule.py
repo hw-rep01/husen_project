@@ -217,7 +217,9 @@ def reschedule_route(
     db: Session = Depends(get_db),
 ) -> OccurrenceOut:
     reschedule(
-        db, user, occurrence_id,
+        db,
+        user,
+        occurrence_id,
         new_date=payload.new_date,
         time_slot_id=payload.time_slot_id,
         room_id=payload.room_id,

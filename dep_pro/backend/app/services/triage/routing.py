@@ -19,12 +19,14 @@ DECISION_STATUS: dict[Action, RequestStatus] = {
     Action.RESOLVE: RequestStatus.RESOLVED,
 }
 
-TERMINAL_STATUSES: frozenset[RequestStatus] = frozenset({
-    RequestStatus.APPROVED,
-    RequestStatus.REJECTED,
-    RequestStatus.RESOLVED,
-    RequestStatus.CLOSED,
-})
+TERMINAL_STATUSES: frozenset[RequestStatus] = frozenset(
+    {
+        RequestStatus.APPROVED,
+        RequestStatus.REJECTED,
+        RequestStatus.RESOLVED,
+        RequestStatus.CLOSED,
+    }
+)
 
 PATHS: dict[RequestCategory, tuple[RoutingStage, ...]] = {
     RequestCategory.ACADEMIC: (
@@ -55,12 +57,12 @@ STAGE_ROLE: dict[RoutingStage, UserRole] = {
 
 _PERMISSION_BY_STAGE: dict[RoutingStage, dict[Action, str]] = {
     RoutingStage.CLASS_REPRESENTATIVE: {Action.FORWARD: "request:forward"},
-    RoutingStage.INSTRUCTOR: {action: "request:decide_academic" for action in _DECISIONS},
+    RoutingStage.INSTRUCTOR: dict.fromkeys(_DECISIONS, "request:decide_academic"),
     RoutingStage.DEPARTMENT_COORDINATOR: {
         Action.FORWARD: "request:decide_administrative",
-        **{action: "request:decide_administrative" for action in _DECISIONS},
+        **dict.fromkeys(_DECISIONS, "request:decide_administrative"),
     },
-    RoutingStage.DEPARTMENT_HEAD: {action: "request:decide_final" for action in _DECISIONS},
+    RoutingStage.DEPARTMENT_HEAD: dict.fromkeys(_DECISIONS, "request:decide_final"),
 }
 
 

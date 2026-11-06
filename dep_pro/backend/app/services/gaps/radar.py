@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import numpy as np
 from sqlalchemy import delete, func, select
@@ -29,7 +29,11 @@ from app.models import (
 )
 from app.services.common.vector_math import cosine_similarity, normalize_rows, to_matrix
 from app.services.errors import NotFoundError
-from app.services.gaps.clustering import centroid_of, cluster_embeddings, most_central_index
+from app.services.gaps.clustering import (
+    centroid_of,
+    cluster_embeddings,
+    most_central_index,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +62,7 @@ class RadarRunResult:
 
 
 def _as_aware(value: datetime) -> datetime:
-    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+    return value if value.tzinfo else value.replace(tzinfo=UTC)
 
 
 def _section_student_total(db: Session, section_id: int) -> int:
@@ -234,7 +238,7 @@ def run_radar_for_scope(db: Session, course_id: int, section_id: int, semester_i
         instructor_ids = list(
             db.scalars(select(CourseInstructor.instructor_id).where(CourseInstructor.course_id == course_id))
         )
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         for label in sorted(set(labels.tolist())):
             indices = np.flatnonzero(labels == label)
@@ -319,10 +323,7 @@ def _active_scopes(db: Session, course_id: int | None = None) -> set[tuple[int, 
 
 
 def run_radar_for_course(db: Session, course_id: int) -> list[RadarRunResult]:
-    return [
-        run_radar_for_scope(db, c, s, m)
-        for c, s, m in sorted(_active_scopes(db, course_id))
-    ]
+    return [run_radar_for_scope(db, c, s, m) for c, s, m in sorted(_active_scopes(db, course_id))]
 
 
 def run_radar_all_active(db: Session) -> list[RadarRunResult]:
@@ -334,6 +335,8 @@ def run_radar_all_active(db: Session) -> list[RadarRunResult]:
             db.rollback()
             logger.exception(
                 "فشل تشغيل الرادار للنطاق course=%s section=%s semester=%s",
-                course_id, section_id, semester_id,
+                course_id,
+                section_id,
+                semester_id,
             )
     return results

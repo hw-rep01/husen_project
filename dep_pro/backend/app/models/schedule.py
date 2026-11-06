@@ -1,6 +1,17 @@
 from datetime import date, datetime, time
 
-from sqlalchemy import Date, DateTime, Enum, ForeignKey, Integer, String, Text, Time, UniqueConstraint, func
+from sqlalchemy import (
+    Date,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    Time,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -12,7 +23,9 @@ class Room(Base):
     __table_args__ = (UniqueConstraint("department_id", "code", name="uq_room_code_per_dept"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    department_id: Mapped[int | None] = mapped_column(ForeignKey("departments.id", ondelete="SET NULL"), nullable=True, index=True)
+    department_id: Mapped[int | None] = mapped_column(
+        ForeignKey("departments.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     code: Mapped[str] = mapped_column(String(32))
     name: Mapped[str | None] = mapped_column(String(255))
     capacity: Mapped[int] = mapped_column(Integer, default=0)
@@ -31,9 +44,7 @@ class TimeSlot(Base):
 
 class WeeklyScheduleEntry(Base):
     __tablename__ = "weekly_schedule_entries"
-    __table_args__ = (
-        UniqueConstraint("enrollment_id", "weekday", "time_slot_id", name="uq_weekly_entry"),
-    )
+    __table_args__ = (UniqueConstraint("enrollment_id", "weekday", "time_slot_id", name="uq_weekly_entry"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     enrollment_id: Mapped[int] = mapped_column(ForeignKey("enrollments.id", ondelete="CASCADE"), index=True)
@@ -48,9 +59,7 @@ class WeeklyScheduleEntry(Base):
 
 class LectureOccurrence(Base):
     __tablename__ = "lecture_occurrences"
-    __table_args__ = (
-        UniqueConstraint("weekly_entry_id", "occurrence_date", name="uq_occurrence_per_day"),
-    )
+    __table_args__ = (UniqueConstraint("weekly_entry_id", "occurrence_date", name="uq_occurrence_per_day"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     weekly_entry_id: Mapped[int | None] = mapped_column(
@@ -67,7 +76,9 @@ class LectureOccurrence(Base):
     is_cancelled: Mapped[bool] = mapped_column(default=False)
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
     version: Mapped[int] = mapped_column(Integer, default=1)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     enrollment: Mapped["Enrollment"] = relationship()
     room: Mapped["Room | None"] = relationship()

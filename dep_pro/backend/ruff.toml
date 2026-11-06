@@ -1,0 +1,33 @@
+# إعدادات Ruff — أداة الفحص والتنسيق التلقائي للخلفية
+line-length = 120
+target-version = "py311"
+
+[lint]
+select = [
+    "E",   # أخطاء pycodestyle الأساسية
+    "W",   # تحذيرات pycodestyle
+    "F",   # pyflakes (استيراد غير مستخدم، أسماء معرفة)
+    "I",   # ترتيب الاستيرادات (isort)
+    "UP",  # تحديثات الصياغة إلى Python حديث
+    "B",   # أفضل ممارسات flake8-bugbear
+    "C4",  # تحسينات comprehension
+    "SIM", # تبسيط الشروط
+    "PIE", # اقتراحات عامة لتحسين الكود
+    "RUF", # قواعد Ruff الخاصة
+]
+ignore = [
+    "B008", # FastAPI يعتمد على Depends() في الوسائط الافتراضية — نمط موصى به رسمياً
+    "E731", # السماح بتعريف دوال lambda قصيرة
+    "RUF001", # المشروع يستخدم العربية في النصوص والتعليقات
+    "RUF002",
+    "RUF003",
+]
+
+[lint.per-file-ignores]
+# النماذج تستخدم مراجعات علاقة نصية أمامية ("Department") — صحيحة وقت التشغيل عبر SQLAlchemy
+"app/models/*.py" = ["F821"]
+"**/tests/*" = ["S101"]
+
+[format]
+quote-style = "double"
+indent-style = "space"

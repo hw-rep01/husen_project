@@ -1,9 +1,16 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.models import RequestCategory, RequestStatus, RoutingStage, Section, StudentRequest, User
+from app.models import (
+    RequestCategory,
+    RequestStatus,
+    RoutingStage,
+    Section,
+    StudentRequest,
+    User,
+)
 from app.services.access import ensure_course_access
 from app.services.errors import BusinessRuleError
 from app.services.rag.embeddings import get_embedder
@@ -46,7 +53,7 @@ def submit_request(
         if result.confidence >= settings.request_classification_min_confidence:
             category = RequestCategory(result.category)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     request = StudentRequest(
         student_id=actor.id,
         section_id=actor.section_id,

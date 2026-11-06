@@ -1,4 +1,4 @@
-from datetime import datetime, time, timezone
+from datetime import UTC, datetime, time
 
 from sqlalchemy.orm import Session
 
@@ -39,8 +39,8 @@ def seed() -> None:
         semester = Semester(
             academic_year_id=year.id,
             name="الأول",
-            starts_on=datetime(2026, 9, 1, tzinfo=timezone.utc),
-            ends_on=datetime(2027, 1, 15, tzinfo=timezone.utc),
+            starts_on=datetime(2026, 9, 1, tzinfo=UTC),
+            ends_on=datetime(2027, 1, 15, tzinfo=UTC),
             is_active=True,
         )
         db.add(semester)
@@ -49,29 +49,52 @@ def seed() -> None:
         db.add(section)
         db.flush()
 
-        head = User(full_name="رئيس القسم", email="head@sdp.local",
-                    password_hash=hash_password("ChangeMe123!"), role=UserRole.DEPARTMENT_HEAD,
-                    department_id=dept.id)
-        coord = User(full_name="مقرر القسم", email="coord@sdp.local",
-                     password_hash=hash_password("ChangeMe123!"), role=UserRole.DEPARTMENT_COORDINATOR,
-                     department_id=dept.id)
-        instructor = User(full_name="د. أستاذ المادة", email="dr@sdp.local",
-                          password_hash=hash_password("ChangeMe123!"), role=UserRole.INSTRUCTOR,
-                          department_id=dept.id)
-        rep = User(full_name="ممثل الشعبة", email="rep@sdp.local",
-                   password_hash=hash_password("ChangeMe123!"), role=UserRole.CLASS_REPRESENTATIVE,
-                   department_id=dept.id, section_id=section.id)
-        student = User(full_name="طالب تجريبي", email="student@sdp.local",
-                       password_hash=hash_password("ChangeMe123!"), role=UserRole.STUDENT,
-                       department_id=dept.id, section_id=section.id)
+        head = User(
+            full_name="رئيس القسم",
+            email="head@sdp.local",
+            password_hash=hash_password("ChangeMe123!"),
+            role=UserRole.DEPARTMENT_HEAD,
+            department_id=dept.id,
+        )
+        coord = User(
+            full_name="مقرر القسم",
+            email="coord@sdp.local",
+            password_hash=hash_password("ChangeMe123!"),
+            role=UserRole.DEPARTMENT_COORDINATOR,
+            department_id=dept.id,
+        )
+        instructor = User(
+            full_name="د. أستاذ المادة",
+            email="dr@sdp.local",
+            password_hash=hash_password("ChangeMe123!"),
+            role=UserRole.INSTRUCTOR,
+            department_id=dept.id,
+        )
+        rep = User(
+            full_name="ممثل الشعبة",
+            email="rep@sdp.local",
+            password_hash=hash_password("ChangeMe123!"),
+            role=UserRole.CLASS_REPRESENTATIVE,
+            department_id=dept.id,
+            section_id=section.id,
+        )
+        student = User(
+            full_name="طالب تجريبي",
+            email="student@sdp.local",
+            password_hash=hash_password("ChangeMe123!"),
+            role=UserRole.STUDENT,
+            department_id=dept.id,
+            section_id=section.id,
+        )
         db.add_all([head, coord, instructor, rep, student])
         db.flush()
 
         dept.head_user_id = head.id
         dept.coordinator_user_id = coord.id
 
-        course = Course(department_id=dept.id, code="SE301", name_ar="هندسة المتطلبات",
-                        name_en="Requirements Engineering", stage=2)
+        course = Course(
+            department_id=dept.id, code="SE301", name_ar="هندسة المتطلبات", name_en="Requirements Engineering", stage=2
+        )
         db.add(course)
         db.flush()
 

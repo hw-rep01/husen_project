@@ -134,15 +134,11 @@ def plan_morning_digests(db: Session, now: datetime) -> int:
     )
 
     lines_by_section: dict[int, list[str]] = defaultdict(list)
-    for occ, section_id, course_name, room_code in course_room_rows(
-        db, [LectureOccurrence.occurrence_date == today]
-    ):
+    for occ, section_id, course_name, room_code in course_room_rows(db, [LectureOccurrence.occurrence_date == today]):
         start_local = as_utc(occ.starts_at).astimezone(tz)
         end_local = as_utc(occ.ends_at).astimezone(tz)
         place = room_code or "غير محددة"
-        lines_by_section[section_id].append(
-            f"{start_local:%H:%M} - {end_local:%H:%M}: {course_name} (القاعة: {place})"
-        )
+        lines_by_section[section_id].append(f"{start_local:%H:%M} - {end_local:%H:%M}: {course_name} (القاعة: {place})")
 
     students = db.execute(
         select(User.id, User.section_id).where(

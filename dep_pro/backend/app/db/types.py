@@ -21,6 +21,7 @@ class VectorType(TypeDecorator):
     def load_dialect_impl(self, dialect):
         if dialect.name == "postgresql":
             from pgvector.sqlalchemy import Vector
+
             return dialect.type_descriptor(Vector(self.dimension))
         return dialect.type_descriptor(JSON())
 

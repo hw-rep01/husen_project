@@ -1,6 +1,6 @@
 from sqlalchemy import text
 
-from app import models  # noqa: F401  (تسجيل النماذج في Base.metadata)
+from app import models
 from app.db.base import Base
 from app.db.session import engine
 

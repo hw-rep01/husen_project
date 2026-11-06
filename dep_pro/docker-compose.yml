@@ -6,8 +6,6 @@ x-backend-env: &backend-env
   JWT_SECRET_KEY: ${JWT_SECRET_KEY:?set JWT_SECRET_KEY in .env}
   EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-openai}
   OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-  # مفاتيح sk-proj لا تدعم وسائط التضمين المخصصة -> البُعد 1536 مع text-embedding-3-small
-  EMBEDDING_DIMENSION: ${EMBEDDING_DIMENSION:-1536}
   STORAGE_DIR: /app/storage/materials
   CORS_ORIGINS: http://localhost:${HTTP_PORT:-8080}
   TIMEZONE: Asia/Baghdad

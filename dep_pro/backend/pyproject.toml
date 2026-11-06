@@ -1,0 +1,9 @@
+[project]
+name = "smart-department-backend"
+version = "0.1.0"
+description = "Smart Department Platform - Backend"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

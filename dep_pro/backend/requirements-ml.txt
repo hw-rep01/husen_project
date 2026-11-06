@@ -1,0 +1,2 @@
+# اختياري: التضمين المحلي بـ HuggingFace. يتطلب torch، ولا يلزم لتشغيل النظام بـ OpenAI.
+sentence-transformers==3.3.1

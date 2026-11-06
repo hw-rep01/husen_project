@@ -53,9 +53,18 @@ class OpenAIEmbedder:
     def __init__(self, model: str, dimension: int, api_key: str) -> None:
         from langchain_openai import OpenAIEmbeddings
 
-        # dimensions تضمن أن الناتج يطابق الجدول حتى لو كان النموذج يدعم أبعاداً أكبر
-        self._client = OpenAIEmbeddings(model=model, dimensions=dimension, api_key=api_key)
-        self.dimension = dimension
+        # مفاتيح sk-proj الجديدة لا تقبل وسائط التضمين المخصصة (dimensions)،
+        # لذا نرسلها فقط للنماذج القديمة؛ text-embedding-3-small يعيد 1536 افتراضياً.
+        kwargs = {}
+        if not model.startswith("text-embedding-3"):
+            kwargs["dimensions"] = dimension
+            actual_dim = dimension
+        else:
+            actual_dim = 1536 if model == "text-embedding-3-small" else 3072
+        self._client = OpenAIEmbeddings(
+            model=model, api_key=api_key, check_embedding_ctx_length=False, **kwargs
+        )
+        self.dimension = actual_dim
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         if not texts:
@@ -103,11 +112,17 @@ def get_embedder() -> Embedder:
     if settings.embedding_provider == "openai":
         if not settings.openai_api_key:
             raise LLMNotConfiguredError("OPENAI_API_KEY غير مضبوط لاستخدام تضمينات OpenAI.")
-        return OpenAIEmbedder(
+        embedder = OpenAIEmbedder(
             model=settings.openai_embedding_model,
             dimension=settings.embedding_dimension,
             api_key=settings.openai_api_key,
         )
+        if embedder.dimension != settings.embedding_dimension:
+            raise ValueError(
+                f"بُعد تضمينات OpenAI هو {embedder.dimension} بينما EMBEDDING_DIMENSION={settings.embedding_dimension}. "
+                "أضف OPENAI_EMBEDDING_DIMENSIONS=<البُعد> إلى .env وأعد تشغيل الحاويات من قاعدة بيانات جديدة."
+            )
+        return embedder
     return HuggingFaceEmbedder(
         model_name=settings.embedding_model,
         dimension=settings.embedding_dimension,
